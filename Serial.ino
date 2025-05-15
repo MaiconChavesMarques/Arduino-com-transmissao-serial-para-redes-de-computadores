@@ -1,14 +1,24 @@
-
 #define PINO_RX 13
 #define PINO_TX 13
 #define BAUD_RATE 1
 #define HALF_BAUD 1000/(2*BAUD_RATE)
 
 #include "Temporizador.h"
+#include <bits/stdc++.h>
+using namespace std;
 
 // Calcula bit de paridade - Par ou impar
-bool bitParidade(char dado){
+bool bitParidade(char dado) {
+  bitset<8> dadoBinario(dado);
 
+  bool quantidadeDeUm = false; // Para o bit de paridade par
+
+  for(int i = 0; i < dadoBinario.size() - 1; i++) {
+      if(dadoBinario[i] == 1)
+          quantidadeDeUm = !quantidadeDeUm;
+  }
+  
+  return quantidadeDeUm;
 }
 
 // Rotina de interrupcao do timer1
