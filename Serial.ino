@@ -29,13 +29,15 @@ bool bitParidade(char dado) {
 // O que fazer toda vez que 1s passou?
 ISR(TIMER1_COMPA_vect){
   //>>>> Codigo Aqui <<<<
-  if(flag < 9){
-    if(bitsParaEnviar[flag] == 1){
-      digitalWrite(PINO_TX, HIGH);
-    }else{
-      digitalWrite(PINO_TX, LOW);
+  if(flag < 18){
+    if(flag % 2 == 1) {
+      if(bitsParaEnviar[flag] == 1){
+        digitalWrite(PINO_TX, HIGH);
+      }else{
+        digitalWrite(PINO_TX, LOW);
+      }
+      flag = flag + 1;
     }
-    flag = flag + 1;
   }else{
     paraTemporizador();
   }
@@ -58,7 +60,7 @@ void setup(){
   digitalWrite(PINO_TX, LOW);
   // Configura timer
   //>>>> Codigo Aqui <<<<
-  configuraTemporizador(1);
+  configuraTemporizador(2);
   // habilita interrupcoes
   interrupts();
 }
@@ -82,7 +84,7 @@ void loop ( ) {
     while (!digitalRead(PINO_RX))
     {}
     iniciaTemporizador();
-    while (flag < 9)
+    while (flag < 18)
     {}
     digitalWrite(PINO_TX, LOW);
     flag = 0;
