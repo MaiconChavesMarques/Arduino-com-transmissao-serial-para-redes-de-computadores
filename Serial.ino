@@ -4,22 +4,21 @@
 #define HALF_BAUD 1000/(2*BAUD_RATE)
 
 #include "Temporizador.h"
-#include <bits/stdc++.h>
-#include <bitset>
-using namespace std;
 
 volatile int flag = 0;
 volatile bool bitsParaEnviar[9]; //Esse é o dado final
 
 // Calcula bit de paridade - Par ou impar
 bool bitParidade(char dado) {
-  bitset<8> dadoBinario(dado);
+  bool bitsDado[8];
 
-  bool quantidadeDeUm = false; // Para o bit de paridade par
+  bool quantidadeDeUm = false;
 
-  for(int i = 0; i < dadoBinario.size(); i++) {
-      if(dadoBinario[i] == 1)
-          quantidadeDeUm = !quantidadeDeUm;
+  for(int i = 0; i < 8; i++) {
+    bitsDado[i] = (dado >> i) & 1;
+
+    if(bitsDado[i] == 1)
+      quantidadeDeUm = !quantidadeDeUm;
   }
   
   return quantidadeDeUm;
@@ -41,10 +40,6 @@ ISR(TIMER1_COMPA_vect){
   }else{
     paraTemporizador();
   }
-
-  //Passou 1 segundo eu suponho que preciso enviar meu bit
-  //Envio o proximo bit da lista, se tiver bit ainda
-  //bits enviados = bits enviados + 1
 }
 
 // Executada uma vez quando o Arduino reseta
@@ -72,14 +67,21 @@ void loop ( ) {
     char caractere = Serial.read(); // Lê 1 caractere
     Serial.print("Recebi: ");
     Serial.println(caractere);
-    bitset<8> dados(caractere);
+
+    bool dados[8];
+    for(int i = 0; i < 8; i++) {
+      dados[i] = (caractere >> i) & 1;
+    }
+
     for (int i = 0; i < 8; i++) {
       bitsParaEnviar[i] = dados[i];
     }
+
     bitsParaEnviar[8] = bitParidade(caractere);
     for(int i = 0; i < 9; i++){
       Serial.print(bitsParaEnviar[i]);
     }
+
     digitalWrite(PINO_TX, HIGH);
     while (!digitalRead(PINO_RX))
     {}
@@ -89,11 +91,4 @@ void loop ( ) {
     digitalWrite(PINO_TX, LOW);
     flag = 0;
   }
-  //Se veio
-  //preparo o dado
-  //coloco tx como 1
-  //enquanto rx for igual a 0 fico preso
-  //inicia Temporizador()
-  //if(quantidade de bits transmitido for 8)
-  //paraTemporizador
 }
