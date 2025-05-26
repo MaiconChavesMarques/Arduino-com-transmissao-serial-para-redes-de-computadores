@@ -1,5 +1,5 @@
-#define PINO_RX 0
-#define PINO_TX 1
+#define PINO_RX 2
+#define PINO_TX 3
 #define BAUD_RATE 1
 #define HALF_BAUD 1000/(2*BAUD_RATE)
 
