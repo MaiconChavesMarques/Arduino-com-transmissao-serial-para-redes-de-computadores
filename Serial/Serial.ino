@@ -1,5 +1,6 @@
-#define PINO_RX 2
-#define PINO_TX 3
+#define PINO_TX 13
+#define PINO_CTS 12
+#define PINO_RTS 8
 #define BAUD_RATE 1
 #define HALF_BAUD 1000/(2*BAUD_RATE)
 
@@ -28,17 +29,23 @@ bool bitParidade(char dado) {
 // O que fazer toda vez que 1s passou?
 ISR(TIMER1_COMPA_vect){
   //>>>> Codigo Aqui <<<<
+  //Serial.println("interrompidouuu");
+  //Serial.println(flag);
   if(flag < 18){
-    if(flag % 2 == 1) {
-      if(bitsParaEnviar[flag] == 1){
+    if(flag % 2 == 0) {
+      Serial.print("Bit enviado: ");
+      Serial.println(bitsParaEnviar[flag/2]);
+      if(bitsParaEnviar[flag/2] == 1){
         digitalWrite(PINO_TX, HIGH);
       }else{
         digitalWrite(PINO_TX, LOW);
       }
-      flag = flag + 1;
     }
+    flag = flag + 1;
   }else{
+    flag = flag + 1;
     paraTemporizador();
+    digitalWrite(PINO_RTS, LOW);
   }
 }
 
@@ -51,11 +58,13 @@ void setup(){
   // Inicializa TX ou RX
   //>>>> Codigo Aqui <<<<
   pinMode(PINO_TX, OUTPUT);
-  pinMode(PINO_RX, INPUT);
+  pinMode(PINO_CTS, INPUT);
+  pinMode(PINO_RTS, OUTPUT);
+  digitalWrite(PINO_RTS, LOW);
   digitalWrite(PINO_TX, LOW);
   // Configura timer
   //>>>> Codigo Aqui <<<<
-  configuraTemporizador(2);
+  configuraTemporizador(BAUD_RATE*2);
   // habilita interrupcoes
   interrupts();
 }
@@ -82,13 +91,12 @@ void loop ( ) {
       Serial.print(bitsParaEnviar[i]);
     }
 
-    digitalWrite(PINO_TX, HIGH);
-    while (!digitalRead(PINO_RX))
+    digitalWrite(PINO_RTS, HIGH);
+    while (!digitalRead(PINO_CTS))
     {}
     iniciaTemporizador();
-    while (flag < 18)
+    while (flag <= 18 && digitalRead(PINO_CTS) == HIGH)
     {}
-    digitalWrite(PINO_TX, LOW);
     flag = 0;
   }
 }
